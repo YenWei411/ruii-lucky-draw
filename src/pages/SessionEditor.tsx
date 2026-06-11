@@ -17,6 +17,7 @@ const SessionEditor = () => {
   const navigate = useNavigate();
   const { sessions, updateSession } = useLuckyDraw();
   const { init, playSound } = useAudio();
+  
   const session = sessions.find(s => s.id === id);
 
   const [name, setName] = useState('');
@@ -27,9 +28,9 @@ const SessionEditor = () => {
     if (session) {
       init();
     }
-  }, [session]);
+  }, [session, init]);
 
-  if (!session) return <div>Session not found</div>;
+  if (!session) return <div className="min-h-screen bg-[#0f172a] text-white p-8 flex items-center justify-center">Session not found</div>;
 
   const handleAddParticipant = () => {
     if (!name) return;

@@ -18,7 +18,8 @@ const DrawScreen = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { sessions, updateSession } = useLuckyDraw();
-  const { init, playSound, toggleMute, isMuted } = useAudio();
+  const { init, playSound, toggleMute } = useAudio();
+  
   const session = sessions.find(s => s.id === id);
 
   const [isSpinning, setIsSpinning] = useState(false);
@@ -28,9 +29,40 @@ const DrawScreen = () => {
 
   useEffect(() => {
     if (session) init();
-  }, [session]);
+  }, [session, init]);
 
-  if (!session) return <div>Session not found</div>;
+  const handleWinner = useCallback((winner: Participant) => {
+    if (!session) return;
+    
+    setIsSpinning(false);
+    setShowConfetti(true);
+    playSound('win');
+
+    const newWinner: Winner = {
+      participantId: winner.id,
+      name: winner.name,
+      prizeNumber: session.winners.length + 1,
+      drawnAt: Date.now(),
+      machineType: session.machineType
+    };
+
+    const updatedParticipants = session.participants.map(p => {
+      if (p.id === winner.id) {
+        return { ...p, hasWon: true, tickets: Math.max(0, p.tickets - 1) };
+      }
+      return p;
+    });
+
+    updateSession({
+      ...session,
+      winners: [...session.winners, newWinner],
+      participants: updatedParticipants
+    });
+
+    setTimeout(() => setShowConfetti(false), 5000);
+  }, [session, updateSession, playSound]);
+
+  if (!session) return <div className="min-h-screen bg-[#0f172a] text-white p-8 flex items-center justify-center">Session not found</div>;
 
   const activeParticipants = session.participants.filter(p => !p.muted && !p.hasWon);
   const winners = session.winners;
@@ -53,35 +85,6 @@ const DrawScreen = () => {
     setIsSpinning(true);
     playSound('pop');
   };
-
-  const handleWinner = useCallback((winner: Participant) => {
-    setIsSpinning(false);
-    setShowConfetti(true);
-    playSound('win');
-
-    const newWinner: Winner = {
-      participantId: winner.id,
-      name: winner.name,
-      prizeNumber: winners.length + 1,
-      drawnAt: Date.now(),
-      machineType: session.machineType
-    };
-
-    const updatedParticipants = session.participants.map(p => {
-      if (p.id === winner.id) {
-        return { ...p, hasWon: true, tickets: Math.max(0, p.tickets - 1) };
-      }
-      return p;
-    });
-
-    updateSession({
-      ...session,
-      winners: [...session.winners, newWinner],
-      participants: updatedParticipants
-    });
-
-    setTimeout(() => setShowConfetti(false), 5000);
-  }, [session, winners, updateSession, playSound]);
 
   const exportCSV = () => {
     const headers = "Prize #,Winner Name,Drawn At\n";
