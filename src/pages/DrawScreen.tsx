@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLuckyDraw } from '@/hooks/use-lucky-draw';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Trophy, Volume2, VolumeX, Download, Play } from 'lucide-react';
+import { ArrowLeft, Trophy, Volume2, VolumeX, Download, Play, X, Check } from 'lucide-react';
 import { useAudio } from '@/hooks/use-audio';
 import Confetti from '@/components/Confetti';
 import WheelMachine from '@/components/machines/WheelMachine';
@@ -25,6 +25,7 @@ const DrawScreen = () => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingWinner, setPendingWinner] = useState<Participant | null>(null);
   const [muted, setMuted] = useState(false);
 
   useEffect(() => {
@@ -32,23 +33,29 @@ const DrawScreen = () => {
   }, [session, init]);
 
   const handleWinner = useCallback((winner: Participant) => {
-    if (!session) return;
-    
     setIsSpinning(false);
+    setPendingWinner(winner);
+    playSound('ding');
+  }, [playSound]);
+
+  const handleAcceptPrize = () => {
+    if (!session || !pendingWinner) return;
+
     setShowConfetti(true);
     playSound('win');
 
     const newWinner: Winner = {
-      participantId: winner.id,
-      name: winner.name,
+      participantId: pendingWinner.id,
+      name: pendingWinner.name,
       prizeNumber: session.winners.length + 1,
       drawnAt: Date.now(),
       machineType: session.machineType
     };
 
     const updatedParticipants = session.participants.map(p => {
-      if (p.id === winner.id) {
-        return { ...p, hasWon: true, tickets: Math.max(0, p.tickets - 1) };
+      if (p.id === pendingWinner.id) {
+        // Remove all entries and mark as won
+        return { ...p, hasWon: true, tickets: 0 };
       }
       return p;
     });
@@ -59,21 +66,39 @@ const DrawScreen = () => {
       participants: updatedParticipants
     });
 
+    setPendingWinner(null);
     setTimeout(() => setShowConfetti(false), 5000);
-  }, [session, updateSession, playSound]);
+  };
+
+  const handleRejectPrize = () => {
+    if (!session || !pendingWinner) return;
+
+    playSound('pop');
+
+    const updatedParticipants = session.participants.map(p => {
+      if (p.id === pendingWinner.id) {
+        // Remove only the single entry that was drawn
+        return { ...p, tickets: Math.max(0, p.tickets - 1) };
+      }
+      return p;
+    });
+
+    updateSession({
+      ...session,
+      participants: updatedParticipants
+    });
+
+    setPendingWinner(null);
+  };
 
   if (!session) return <div className="min-h-screen bg-[#0f172a] text-white p-8 flex items-center justify-center">Session not found</div>;
 
-  const activeParticipants = session.participants.filter(p => !p.muted && !p.hasWon);
+  const activeParticipants = session.participants.filter(p => !p.muted && !p.hasWon && p.tickets > 0);
   const winners = session.winners;
   const remainingPrizes = session.prizeCount - winners.length;
 
   const handleDrawClick = () => {
-    if (remainingPrizes <= 0) {
-      playSound('error');
-      return;
-    }
-    if (activeParticipants.length === 0) {
+    if (remainingPrizes <= 0 || activeParticipants.length === 0) {
       playSound('error');
       return;
     }
@@ -165,7 +190,7 @@ const DrawScreen = () => {
           
           <Button 
             onClick={handleDrawClick}
-            disabled={isSpinning || remainingPrizes <= 0}
+            disabled={isSpinning || remainingPrizes <= 0 || !!pendingWinner}
             className={`w-64 h-20 text-2xl font-bold rounded-full shadow-2xl transition-all transform active:scale-95 ${isSpinning ? 'bg-slate-700' : 'bg-pink-600 hover:bg-pink-500 animate-pulse'}`}
           >
             {isSpinning ? 'SPINNING...' : 'DRAW!'}
@@ -199,6 +224,7 @@ const DrawScreen = () => {
         </div>
       </div>
 
+      {/* Draw Confirmation */}
       <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
         <AlertDialogContent className="bg-slate-900 border-slate-700 text-white">
           <AlertDialogHeader>
@@ -212,6 +238,36 @@ const DrawScreen = () => {
             <AlertDialogAction onClick={startDraw} className="bg-pink-600 hover:bg-pink-700">
               <Play className="mr-2" size={16} /> Let's Go!
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Prize Acceptance Confirmation */}
+      <AlertDialog open={!!pendingWinner} onOpenChange={(open) => !open && setPendingWinner(null)}>
+        <AlertDialogContent className="bg-slate-900 border-slate-700 text-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-3xl font-['Lilita_One'] text-pink-400 text-center">
+              WINNER REVEALED!
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center space-y-4">
+              <div className="text-5xl font-bold text-white py-4">{pendingWinner?.name}</div>
+              <div className="text-slate-400 text-lg">Does this participant want the prize?</div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex justify-center gap-4 sm:justify-center">
+            <Button 
+              onClick={handleRejectPrize}
+              variant="outline"
+              className="flex-1 border-red-500 text-red-500 hover:bg-red-500/10 h-16 text-xl font-bold"
+            >
+              <X className="mr-2" /> NO (Remove 1 Entry)
+            </Button>
+            <Button 
+              onClick={handleAcceptPrize}
+              className="flex-1 bg-green-600 hover:bg-green-700 h-16 text-xl font-bold"
+            >
+              <Check className="mr-2" /> YES (Award Prize)
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
