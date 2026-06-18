@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, Plus, Trash2, Volume2, VolumeX, Save } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Volume2, VolumeX, Save, Pencil } from 'lucide-react';
 import { useAudio } from '@/hooks/use-audio';
 import { MachineType, Participant } from '@/types/lucky-draw';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 const SessionEditor = () => {
   const { id } = useParams();
@@ -23,6 +24,11 @@ const SessionEditor = () => {
   const [name, setName] = useState('');
   const [tickets, setTickets] = useState(1);
   const [bulkInput, setBulkInput] = useState('');
+  
+  // Edit state
+  const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editTickets, setEditTickets] = useState(1);
 
   useEffect(() => {
     if (session) {
@@ -80,6 +86,26 @@ const SessionEditor = () => {
       ...session,
       participants: session.participants.filter(p => p.id !== pId)
     });
+  };
+
+  const startEditing = (p: Participant) => {
+    setEditingParticipant(p);
+    setEditName(p.name);
+    setEditTickets(p.tickets);
+  };
+
+  const saveEdit = () => {
+    if (!editingParticipant) return;
+    updateSession({
+      ...session,
+      participants: session.participants.map(p => 
+        p.id === editingParticipant.id 
+          ? { ...p, name: editName, tickets: editTickets } 
+          : p
+      )
+    });
+    setEditingParticipant(null);
+    playSound('ding');
   };
 
   return (
@@ -203,6 +229,14 @@ const SessionEditor = () => {
                           <Button 
                             size="icon" 
                             variant="ghost" 
+                            onClick={() => startEditing(p)}
+                            className="text-blue-400 hover:text-blue-300"
+                          >
+                            <Pencil size={16} />
+                          </Button>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
                             onClick={() => toggleMute(p.id)}
                             className={p.muted ? 'text-slate-500' : 'text-yellow-500'}
                           >
@@ -234,6 +268,39 @@ const SessionEditor = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Participant Dialog */}
+      <Dialog open={!!editingParticipant} onOpenChange={(open) => !open && setEditingParticipant(null)}>
+        <DialogContent className="bg-slate-900 border-slate-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-['Lilita_One'] text-blue-400">Edit Participant</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Name</Label>
+              <Input 
+                value={editName} 
+                onChange={(e) => setEditName(e.target.value)}
+                className="bg-slate-800 border-slate-700"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Tickets</Label>
+              <Input 
+                type="number" 
+                min="1" 
+                value={editTickets} 
+                onChange={(e) => setEditTickets(parseInt(e.target.value))}
+                className="bg-slate-800 border-slate-700"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditingParticipant(null)}>Cancel</Button>
+            <Button onClick={saveEdit} className="bg-blue-600 hover:bg-blue-700">Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
