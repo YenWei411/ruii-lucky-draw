@@ -37,14 +37,14 @@ const PachinkoMachine = ({ participants, onWinner, isSpinning }: PachinkoMachine
     let ball = { 
       x: (width * 0.4) + (Math.random() * width * 0.2), 
       y: 20, 
-      vx: (Math.random() - 0.5) * 2, 
+      vx: (Math.random() - 0.5) * 3, 
       vy: 2 
     };
 
-    // Create a structured staggered grid (Pinball style)
+    // Create a denser structured staggered grid
     const pegs: { x: number, y: number }[] = [];
-    const rows = 10;
-    const cols = 11;
+    const rows = 16; // Increased from 10
+    const cols = 18; // Increased from 11
     const spacingX = width / (cols + 1);
     const spacingY = (height - 180) / rows;
 
@@ -78,11 +78,11 @@ const PachinkoMachine = ({ participants, onWinner, isSpinning }: PachinkoMachine
 
       // Draw structured pegs
       pegs.forEach(p => {
-        ctx.shadowBlur = 4;
+        ctx.shadowBlur = 3;
         ctx.shadowColor = '#fbbf24';
         ctx.fillStyle = '#fbbf24';
         ctx.beginPath();
-        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, 2.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
       });
@@ -115,13 +115,13 @@ const PachinkoMachine = ({ participants, onWinner, isSpinning }: PachinkoMachine
         const dx = ball.x - p.x;
         const dy = ball.y - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const minDist = 10; // ball radius + peg radius + buffer
+        const minDist = 8.5; // ball radius + peg radius + buffer
 
         if (dist < minDist) {
           const angle = Math.atan2(dy, dx);
           const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
           // Add a tiny bit of randomness to the bounce to prevent infinite loops
-          const jitter = (Math.random() - 0.5) * 0.5;
+          const jitter = (Math.random() - 0.5) * 0.4;
           ball.vx = Math.cos(angle + jitter) * speed * 0.75;
           ball.vy = Math.sin(angle + jitter) * speed * 0.75;
           ball.x = p.x + Math.cos(angle) * minDist;
@@ -134,7 +134,7 @@ const PachinkoMachine = ({ participants, onWinner, isSpinning }: PachinkoMachine
       ctx.shadowColor = '#ec4899';
       ctx.fillStyle = '#ec4899';
       ctx.beginPath();
-      ctx.arc(ball.x, ball.y, 7, 0, Math.PI * 2);
+      ctx.arc(ball.x, ball.y, 6, 0, Math.PI * 2);
       ctx.fill();
       ctx.shadowBlur = 0;
 
