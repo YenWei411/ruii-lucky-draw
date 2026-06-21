@@ -29,11 +29,19 @@ const Dashboard = () => {
     <div className="min-h-screen bg-[#0f172a] text-white p-8 font-['Nunito']">
       <div className="max-w-6xl mx-auto">
         <header className="flex justify-between items-center mb-12">
-          <div>
-            <h1 className="text-5xl font-['Lilita_One'] text-yellow-400 drop-shadow-[0_4px_0_rgba(0,0,0,0.5)] tracking-wider">
-              LUCKY ARCADE
-            </h1>
-            <p className="text-slate-400 mt-2">Manage your festive draw sessions</p>
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-pink-500 shadow-[0_0_20px_rgba(236,72,153,0.3)]">
+              <img 
+                src="/Ruii logo black.jpg" 
+                alt="Ruii Logo" 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <h1 className="text-5xl font-['Lilita_One'] text-yellow-400 drop-shadow-[0_4px_0_rgba(0,0,0,0.5)] tracking-wider">
+                RUII'S LUCKY DRAW
+              </h1>
+            </div>
           </div>
           <Button 
             onClick={() => setIsCreating(true)}
