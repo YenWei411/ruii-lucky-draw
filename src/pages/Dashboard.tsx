@@ -130,7 +130,8 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sessions.map(session => (
             <Card key={session.id} className="group relative bg-slate-900/40 border-slate-800/50 hover:border-pink-500/50 transition-all duration-500 backdrop-blur-sm overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              {/* Fixed: Added pointer-events-none to the overlay div */}
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               
               <CardHeader className="pb-4">
                 <div className="flex justify-between items-start">
@@ -141,7 +142,7 @@ const Dashboard = () => {
                     variant="ghost" 
                     size="icon" 
                     onClick={() => deleteSession(session.id)}
-                    className="text-slate-600 hover:text-red-400 hover:bg-red-400/10 -mt-2 -mr-2"
+                    className="relative z-10 text-slate-600 hover:text-red-400 hover:bg-red-400/10 -mt-2 -mr-2"
                   >
                     <Trash2 size={16} />
                   </Button>
@@ -165,7 +166,7 @@ const Dashboard = () => {
                 </div>
               </CardContent>
 
-              <CardFooter className="gap-3 pt-2">
+              <CardFooter className="gap-3 pt-2 relative z-10">
                 <Button 
                   onClick={() => navigate(`/edit/${session.id}`)}
                   variant="outline"
