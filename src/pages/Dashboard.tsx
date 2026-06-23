@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLuckyDraw } from '@/hooks/use-lucky-draw';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import { Plus, Trash2, Play, Calendar, Users, Trophy, Settings2, Sparkles } from 'lucide-react';
+import { Plus, Trash2, Play, Calendar, Users, Trophy, Settings2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -55,10 +55,6 @@ const Dashboard = () => {
               <h1 className="text-3xl md:text-4xl font-['Lilita_One'] tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-yellow-500 to-amber-600 drop-shadow-sm">
                 RUII'S LUCKY DRAW
               </h1>
-              <div className="flex items-center gap-2 text-slate-400 text-sm font-medium mt-1">
-                <Sparkles size={14} className="text-pink-500" />
-                <span>Premium Drawing Experience</span>
-              </div>
             </div>
           </div>
 
