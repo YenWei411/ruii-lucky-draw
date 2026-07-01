@@ -36,10 +36,10 @@ const Dashboard = () => {
       <div className="relative max-w-7xl mx-auto px-6 py-12">
         {/* Header Section */}
         <header className="flex flex-col md:flex-row justify-between items-center gap-8 mb-16">
-          <div className="flex items-center gap-5 group">
+          <div className="flex items-center gap-6 group">
             <div className="relative">
               <div className="absolute -inset-1 bg-gradient-to-r from-pink-500 to-violet-600 rounded-2xl blur opacity-40 group-hover:opacity-75 transition duration-1000 group-hover:duration-200" />
-              <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-2xl overflow-hidden bg-slate-900 border border-white/10 flex items-center justify-center">
+              <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden bg-slate-900 border border-white/10 flex items-center justify-center">
                 <img 
                   src="/Ruii logo black.jpg" 
                   alt="Ruii Logo" 
@@ -52,7 +52,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div>
-              <h1 className="text-3xl md:text-4xl font-['Lilita_One'] tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-yellow-500 to-amber-600 drop-shadow-sm">
+              <h1 className="text-3xl md:text-5xl font-['Lilita_One'] tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-yellow-500 to-amber-600 drop-shadow-sm">
                 RUII'S LUCKY DRAW
               </h1>
             </div>
@@ -130,7 +130,6 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sessions.map(session => (
             <Card key={session.id} className="group relative bg-slate-900/40 border-slate-800/50 hover:border-pink-500/50 transition-all duration-500 backdrop-blur-sm overflow-hidden">
-              {/* Fixed: Added pointer-events-none to the overlay div */}
               <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
               
               <CardHeader className="pb-4">
